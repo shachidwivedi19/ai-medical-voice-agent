@@ -8,7 +8,7 @@ from gtts import gTTS
 import google.generativeai as genai
 
 # 🔐 Load Gemini API key
-genai.configure(api_key=st.secrets.get("GOOGLE_API_KEY", None) or "YOUR_API_KEY_HERE")
+genai.configure(api_key=st.secrets.get("GOOGLE_API_KEY", None) or "AIzaSyDmhaN1ZJ1IswbVZQo62IMVCajxGZW2n1Y")
 
 # 🎨 App UI
 st.set_page_config(page_title="AI Medical Voice Agent", page_icon="🩺", layout="centered")
@@ -78,3 +78,4 @@ if st.button("🎤 Record Voice"):
     st.audio(audio_out.name, format="audio/mp3")
 
     st.success("🎯 Response generated successfully!")
+
