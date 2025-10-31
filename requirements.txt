@@ -1,5 +1,5 @@
 streamlit
-streamlit-webrtc
+st_audiorec
 speechrecognition
 gtts
 google-generativeai
