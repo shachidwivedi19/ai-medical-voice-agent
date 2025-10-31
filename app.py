@@ -8,7 +8,7 @@ import google.generativeai as genai
 from streamlit_webrtc import webrtc_streamer, AudioProcessorBase, WebRtcMode
 
 # 🔐 Configure API key
-genai.configure(api_key=st.secrets.get("GOOGLE_API_KEY", None))
+genai.configure(api_key=st.secrets.get("GOOGLE_API_KEY", None) or "AIzaSyDmhaN1ZJ1IswbVZQo62IMVCajxGZW2n1Y")
 
 # 🎨 Streamlit UI
 st.set_page_config(page_title="AI Medical Voice Agent", page_icon="🩺", layout="centered")
@@ -111,3 +111,4 @@ if st.button("🛑 Stop & Analyze") and webrtc_ctx and webrtc_ctx.audio_receiver
         st.success("🎯 Response generated successfully!")
     else:
         st.error("⚠ Unable to get a response from Gemini. Try again later.")
+
