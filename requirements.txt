@@ -1,6 +1,6 @@
 streamlit
-streamlit-audio-recorder
-speechrecognition
-gtts
+SpeechRecognition
+gTTS
 google-generativeai
-numpy
+PyAudio
+pydub
