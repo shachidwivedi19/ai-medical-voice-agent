@@ -1,6 +1,5 @@
 streamlit
-streamlit-webrtc
-SpeechRecognition
-gTTS
+speechrecognition
+gtts
 google-generativeai
 numpy
