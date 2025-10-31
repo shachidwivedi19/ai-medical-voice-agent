@@ -1,5 +1,5 @@
 streamlit
-st_audiorec
+git+https://github.com/stefanrmmr/streamlit-audiorec.git
 speechrecognition
 gtts
 google-generativeai
