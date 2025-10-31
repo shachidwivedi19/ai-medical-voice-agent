@@ -1,31 +1,32 @@
 import streamlit as st
-from st_audiorec import st_audiorec
 import tempfile
+import numpy as np
 import speech_recognition as sr
 from gtts import gTTS
+from streamlit_audio_recorder import audio_recorder
 import google.generativeai as genai
 
-genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+# 🔐 Gemini API key setup
+genai.configure(api_key=st.secrets.get("GOOGLE_API_KEY", None) or "YOUR_GEMINI_API_KEY_HERE")
 
-st.set_page_config(page_title="🩺 AI Medical Voice Agent", page_icon="🎙", layout="centered")
+# 🎨 Streamlit UI setup
+st.set_page_config(page_title="AI Medical Voice Agent", page_icon="🩺", layout="centered")
 st.title("🩺 AI Medical Voice Agent (Gemini)")
-st.caption("Speak for a few seconds — AI will listen, transcribe, and respond with safe, factual medical info.")
+st.caption("Speak for 10 seconds — AI will listen, transcribe, and respond with safe, factual medical information (not diagnosis).")
 
-st.info("🎤 Click below to record your voice (works on all devices).")
-
-# 🎧 Record audio
-audio_bytes = st_audiorec()
+# 🎙 Voice recording
+st.subheader("🎤 Click below to record your voice:")
+audio_bytes = audio_recorder(pause_threshold=10.0, sample_rate=44100)
 
 if audio_bytes:
-    st.audio(audio_bytes, format="audio/wav")
-    st.success("✅ Recording complete! Processing...")
+    st.success("✅ Recording complete!")
 
-    # Save to temp file
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmpfile:
-        tmpfile.write(audio_bytes)
-        audio_path = tmpfile.name
+    # Save to a temporary WAV file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio:
+        temp_audio.write(audio_bytes)
+        audio_path = temp_audio.name
 
-    # 🎙 Speech Recognition
+    # 🧠 Convert speech to text
     recognizer = sr.Recognizer()
     with sr.AudioFile(audio_path) as source:
         audio_data = recognizer.record(source)
@@ -34,23 +35,42 @@ if audio_bytes:
             st.subheader("🗣 You said:")
             st.write(user_text)
         except sr.UnknownValueError:
-            st.error("❌ Could not understand your speech.")
+            st.error("⚠️ Sorry, I couldn’t understand your voice. Please try again.")
             st.stop()
 
-    # 🤖 Gemini AI
-    model = genai.GenerativeModel("gemini-2.0-flash")
-    response = model.generate_content(
-        f"You are a safe and factual medical assistant. Provide general health info for: {user_text}"
-    )
-    ai_text = response.text
+    # 🤖 Gemini AI Response
+    st.subheader("🤖 AI Medical Response:")
+    model_names = ["gemini-2.0-flash", "gemini-2.0-pro", "gemini-1.5-pro", "gemini-1.5-flash"]
+    ai_text = None
 
-    st.subheader("🤖 AI Response:")
+    for model_name in model_names:
+        try:
+            model = genai.GenerativeModel(model_name)
+            prompt = (
+                "You are a safe and factual AI medical information assistant. "
+                "Provide general, educational medical guidance only. "
+                "Do not diagnose or prescribe.\n\n"
+                f"Patient asked: {user_text}"
+            )
+            response = model.generate_content(prompt)
+            ai_text = response.text
+            break
+        except Exception:
+            continue
+
+    if not ai_text:
+        st.error("⚠️ Could not connect to Gemini API. Check your API key or model name.")
+        st.stop()
+
     st.write(ai_text)
 
-    # 🔊 Text-to-speech
+    # 🔊 Convert AI text to speech
     tts = gTTS(ai_text)
-    audio_out = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
-    tts.save(audio_out.name)
-    st.audio(audio_out.name, format="audio/mp3")
+    tts_path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+    tts.save(tts_path.name)
+    st.audio(tts_path.name, format="audio/mp3")
 
-    st.success("🎯 Response ready!")
+    st.success("🎯 Response generated successfully!")
+
+else:
+    st.info("🎧 Click the mic icon above and speak clearly for about 10 seconds.")
