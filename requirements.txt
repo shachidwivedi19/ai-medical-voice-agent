@@ -1,6 +1,6 @@
 streamlit
-sounddevice
-numpy
+streamlit-webrtc
 SpeechRecognition
-gtts
+gTTS
 google-generativeai
+numpy
